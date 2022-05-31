@@ -1,0 +1,59 @@
+# process comments
+ add_filter( 'preprocess_comment' , 'preprocess_spam_comment' );
+
+function is_spam_comment($author_name, $author_url, $comment_content){
+	$author_names = explode($author_name, " ");
+	if(count($author_names) > 3){
+		return true;
+	}
+	# contains url or other invalid symbol
+	$arr=array("/","\\","!","@","#","$","%","^","&","*","(",")","+","=","[","]","{","}","'","\"",":",",",";");
+	foreach($arr as $a){
+		$pos = strpos($author_name,$a);
+		if($pos === false){
+			
+		}else{
+			return true;	
+		}
+	}
+	// check url
+	$arr_2=array("?","=",'.xmc.pl');
+	foreach($arr_2 as $a){
+		$pos = strpos($author_url,$a);
+		if($pos === false){
+			
+		}else{
+			return true;	
+		}
+	}
+	// comment content
+	$home_url = get_bloginfo('url');
+	$comment_content = str_replace($home_url,"",$comment_content);
+	$arr_3=array("https:","http:",".com",".co.uk",".co",".pk",".ca","www.",".at",".a",".b",
+".c",".d",".e",".f",".g",".h",".i",".j",".k",".l",".m",".n",".o",".p",".q",".r",".s",".t",
+".u",".v",".w",".x",".y",".z");
+	foreach($arr_3 as $a){
+		$pos = strpos($comment_content,$a);
+		if($pos === false){
+			
+		}else{
+			return true;	
+		}
+	}
+	return false;
+	
+}
+function preprocess_spam_comment( $commentdata ) {
+    $author_url = $commentdata['comment_author_url'];
+    $author_name = $commentdata['comment_author'];
+	$comment_content = $commentdata['comment_content'];
+    $flag = is_spam_comment($author_name, $author_url, $comment_content);
+    if($flag){
+			
+	     //die("spam comment");
+		 header('Location: /');
+    	 exit();
+		 
+    }
+    return $commentdata;
+}
